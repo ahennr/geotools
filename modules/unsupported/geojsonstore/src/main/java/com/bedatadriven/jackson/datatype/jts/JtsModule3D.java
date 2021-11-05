@@ -34,7 +34,6 @@ import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import java.math.RoundingMode;
 import java.util.Locale;
-
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -79,12 +78,14 @@ public class JtsModule3D extends SimpleModule {
                 "JtsModule3D",
                 new Version(1, 0, 0, null, "com.bedatadriven", "jackson-datatype-jts"));
 
-        addSerializer(Geometry.class, new GeometrySerializer(minDecimals, maxDecimals, rounding, locale));
+        addSerializer(
+                Geometry.class, new GeometrySerializer(minDecimals, maxDecimals, rounding, locale));
         GenericGeometryParser genericGeometryParser = new GenericGeometryParser(geometryFactory);
         addDeserializers(geometryFactory, genericGeometryParser);
     }
 
-    private void addDeserializers(GeometryFactory geometryFactory, GenericGeometryParser genericGeometryParser) {
+    private void addDeserializers(
+            GeometryFactory geometryFactory, GenericGeometryParser genericGeometryParser) {
         addDeserializer(Geometry.class, new GeometryDeserializer<Geometry>(genericGeometryParser));
         addDeserializer(
                 Point.class, new GeometryDeserializer<Point>(new PointParser(geometryFactory)));

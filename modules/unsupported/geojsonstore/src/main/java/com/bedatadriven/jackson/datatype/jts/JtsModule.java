@@ -33,7 +33,6 @@ import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import java.math.RoundingMode;
 import java.util.Locale;
-
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -49,7 +48,7 @@ public class JtsModule extends SimpleModule {
     /** serialVersionUID */
     private static final long serialVersionUID = 3387512874441967803L;
 
-    private GeometrySerializer geometrySerializer;
+    private final GeometrySerializer geometrySerializer;
 
     public JtsModule(int maxDecimals) {
         this(new GeometryFactory(), maxDecimals, 1, RoundingMode.HALF_UP);
@@ -60,7 +59,9 @@ public class JtsModule extends SimpleModule {
     }
 
     public JtsModule(GeometryFactory geometryFactory) {
-        this(geometryFactory, 4, 1, RoundingMode.HALF_UP);
+        geometrySerializer = new GeometrySerializer();
+        addSerializer(Geometry.class, geometrySerializer);
+        addDeserializers(geometryFactory);
     }
 
     public JtsModule(
@@ -86,6 +87,10 @@ public class JtsModule extends SimpleModule {
         geometrySerializer = new GeometrySerializer(minDecimals, maxDecimals, rounding, locale);
         addSerializer(Geometry.class, geometrySerializer);
         addDeserializers(geometryFactory);
+    }
+
+    public JtsModule(GeometryFactory geometryFactory, Locale locale) {
+        this(geometryFactory, 4, 1, RoundingMode.HALF_UP, locale);
     }
 
     private void addDeserializers(GeometryFactory geometryFactory) {

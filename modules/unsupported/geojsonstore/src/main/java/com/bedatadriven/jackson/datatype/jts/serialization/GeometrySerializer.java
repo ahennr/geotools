@@ -51,24 +51,29 @@ import org.locationtech.jts.geom.Polygon;
 
 public class GeometrySerializer extends JsonSerializer<Geometry> {
 
-    NumberFormat format = NumberFormat.getNumberInstance(Locale.ENGLISH);
+    private final NumberFormat format;
     /** Maximum number of decimal places (see https://xkcd.com/2170/ before changing it) */
     int maximumFractionDigits = 4;
 
     int minimumFractionDigits = 1;
 
-    public GeometrySerializer(int minDecimals, int maxDecimals, RoundingMode rounding, Locale locale) {
-        this(minDecimals, maxDecimals, rounding);
-
-        if (locale != null) {
-            format = NumberFormat.getNumberInstance(locale);
-        }
-    }
-
-    public GeometrySerializer(int minDecimals, int maxDecimals, RoundingMode rounding) {
+    public GeometrySerializer(
+            int minDecimals, int maxDecimals, RoundingMode rounding, Locale locale) {
+        format = NumberFormat.getNumberInstance(locale);
         format.setMinimumFractionDigits(minDecimals);
         format.setMaximumFractionDigits(maxDecimals);
         format.setRoundingMode(rounding);
+    }
+
+    public GeometrySerializer(int minDecimals, int maxDecimals, RoundingMode rounding) {
+        format = NumberFormat.getNumberInstance(Locale.getDefault(Locale.Category.FORMAT));
+        format.setMinimumFractionDigits(minDecimals);
+        format.setMaximumFractionDigits(maxDecimals);
+        format.setRoundingMode(rounding);
+    }
+
+    public GeometrySerializer() {
+        format = null;
     }
 
     @Override
@@ -235,7 +240,11 @@ public class GeometrySerializer extends JsonSerializer<Geometry> {
     }
 
     private void writeNumber(final JsonGenerator jgen, final double n) throws IOException {
-        jgen.writeNumber(format.format(n));
+        if (format != null) {
+            jgen.writeNumber(format.format(n));
+        } else {
+            jgen.writeNumber(n);
+        }
     }
 
     public int getMaximumFractionDigits() {
@@ -243,8 +252,10 @@ public class GeometrySerializer extends JsonSerializer<Geometry> {
     }
 
     public void setMaximumFractionDigits(int maximumFractionDigits) {
-        this.maximumFractionDigits = maximumFractionDigits;
-        format.setMaximumFractionDigits(maximumFractionDigits);
+        if (format != null) {
+            this.maximumFractionDigits = maximumFractionDigits;
+            format.setMaximumFractionDigits(maximumFractionDigits);
+        }
     }
 
     public int getMinimumFractionDigits() {
@@ -252,7 +263,9 @@ public class GeometrySerializer extends JsonSerializer<Geometry> {
     }
 
     public void setMinimumFractionDigits(int minimumFractionDigits) {
-        this.minimumFractionDigits = minimumFractionDigits;
-        format.setMinimumFractionDigits(minimumFractionDigits);
+        if (format != null) {
+            this.minimumFractionDigits = minimumFractionDigits;
+            format.setMinimumFractionDigits(minimumFractionDigits);
+        }
     }
 }
